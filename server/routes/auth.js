@@ -6,9 +6,17 @@ const bcrypt = require('bcryptjs');
 // POST - Signup
 router.post('/signup', async (req, res) => {
     try {
-        const { username, password, name } = req.body;
+        const { email, username, password, name } = req.body;
 
-        // Check if user already exists
+        // Check if email already exists
+        const existingEmail = await User.findOne({ email: email.toLowerCase() });
+        if (existingEmail) {
+            return res.status(400).json({
+                message: 'Email already exists / यह ईमेल पहले से है'
+            });
+        }
+
+        // Check if username already exists
         const existingUser = await User.findOne({ username: username.toLowerCase() });
         if (existingUser) {
             return res.status(400).json({
@@ -21,6 +29,7 @@ router.post('/signup', async (req, res) => {
 
         // Create user
         const user = new User({
+            email: email.toLowerCase(),
             username: username.toLowerCase(),
             password: hashedPassword,
             name
@@ -32,6 +41,7 @@ router.post('/signup', async (req, res) => {
             message: 'Account created successfully / अकाउंट बन गया',
             user: {
                 id: user._id,
+                email: user.email,
                 username: user.username,
                 name: user.name,
                 dailySalaryRate: user.dailySalaryRate

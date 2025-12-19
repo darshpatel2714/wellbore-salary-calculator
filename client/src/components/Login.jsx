@@ -4,8 +4,10 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 function Login({ onLogin }) {
     const [isSignup, setIsSignup] = useState(false);
+    const [email, setEmail] = useState('');
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
     const [name, setName] = useState('');
     const [rememberMe, setRememberMe] = useState(true);
     const [loading, setLoading] = useState(false);
@@ -18,7 +20,6 @@ function Login({ onLogin }) {
             const { username: savedUser, password: savedPass } = JSON.parse(savedCredentials);
             setUsername(savedUser);
             setPassword(savedPass);
-            // Auto-login with saved credentials
             handleAutoLogin(savedUser, savedPass);
         }
     }, []);
@@ -37,7 +38,6 @@ function Login({ onLogin }) {
             if (response.ok) {
                 onLogin(data.user);
             } else {
-                // Clear invalid saved credentials
                 localStorage.removeItem('salaryAppCredentials');
                 setUsername('');
                 setPassword('');
@@ -49,6 +49,11 @@ function Login({ onLogin }) {
         }
     };
 
+    const validateEmail = (email) => {
+        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return re.test(email);
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -57,9 +62,27 @@ function Login({ onLogin }) {
             return;
         }
 
-        if (isSignup && !name) {
-            setMessage({ text: 'Please enter your name / अपना नाम भरें', type: 'error' });
-            return;
+        if (isSignup) {
+            if (!name) {
+                setMessage({ text: 'Please enter your name / अपना नाम भरें', type: 'error' });
+                return;
+            }
+            if (!email) {
+                setMessage({ text: 'Please enter your email / अपना ईमेल भरें', type: 'error' });
+                return;
+            }
+            if (!validateEmail(email)) {
+                setMessage({ text: 'Please enter a valid email / सही ईमेल भरें', type: 'error' });
+                return;
+            }
+            if (password !== confirmPassword) {
+                setMessage({ text: 'Passwords do not match / पासवर्ड मेल नहीं खाता', type: 'error' });
+                return;
+            }
+            if (password.length < 6) {
+                setMessage({ text: 'Password must be at least 6 characters / पासवर्ड 6 अक्षर का होना चाहिए', type: 'error' });
+                return;
+            }
         }
 
         setLoading(true);
@@ -68,7 +91,7 @@ function Login({ onLogin }) {
         try {
             const endpoint = isSignup ? '/api/auth/signup' : '/api/auth/login';
             const body = isSignup
-                ? { username, password, name }
+                ? { email, username, password, name }
                 : { username, password };
 
             const response = await fetch(`${API_URL}${endpoint}`, {
@@ -80,18 +103,18 @@ function Login({ onLogin }) {
             const data = await response.json();
 
             if (response.ok) {
-                // Save credentials if Remember Me is checked
                 if (rememberMe) {
                     localStorage.setItem('salaryAppCredentials', JSON.stringify({ username, password }));
                 }
 
                 setMessage({ text: data.message, type: 'success' });
 
-                // If signup, switch to login mode
                 if (isSignup) {
                     setTimeout(() => {
                         setIsSignup(false);
                         setMessage({ text: 'Now login with your credentials / अब लॉगिन करें', type: 'success' });
+                        setEmail('');
+                        setConfirmPassword('');
                     }, 1000);
                 } else {
                     onLogin(data.user);
@@ -128,16 +151,30 @@ function Login({ onLogin }) {
 
                 <form onSubmit={handleSubmit}>
                     {isSignup && (
-                        <div className="form-group">
-                            <label>नाम / Name</label>
-                            <input
-                                type="text"
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                                placeholder="Enter your name"
-                                className="login-input"
-                            />
-                        </div>
+                        <>
+                            <div className="form-group">
+                                <label>नाम / Name</label>
+                                <input
+                                    type="text"
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value)}
+                                    placeholder="Enter your name"
+                                    className="login-input"
+                                />
+                            </div>
+
+                            <div className="form-group">
+                                <label>ईमेल / Email</label>
+                                <input
+                                    type="email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    placeholder="Enter your email"
+                                    className="login-input"
+                                    autoComplete="email"
+                                />
+                            </div>
+                        </>
                     )}
 
                     <div className="form-group">
@@ -163,6 +200,20 @@ function Login({ onLogin }) {
                             autoComplete={isSignup ? 'new-password' : 'current-password'}
                         />
                     </div>
+
+                    {isSignup && (
+                        <div className="form-group">
+                            <label>पासवर्ड दोबारा / Confirm Password</label>
+                            <input
+                                type="password"
+                                value={confirmPassword}
+                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                placeholder="Confirm password"
+                                className="login-input"
+                                autoComplete="new-password"
+                            />
+                        </div>
+                    )}
 
                     <div className="remember-me">
                         <label>
