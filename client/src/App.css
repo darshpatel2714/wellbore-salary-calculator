@@ -525,6 +525,21 @@ body {
   text-decoration: underline;
 }
 
+.forgot-link {
+  text-align: right;
+  margin-bottom: 1rem;
+}
+
+.forgot-link .link-btn {
+  font-size: 0.9rem;
+  color: #999;
+  margin-left: 0;
+}
+
+.forgot-link .link-btn:hover {
+  color: #667eea;
+}
+
 /* ==================== */
 /* HEADER BUTTONS       */
 /* ==================== */

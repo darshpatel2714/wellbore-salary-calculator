@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Login from './components/Login';
+import ResetPassword from './components/ResetPassword';
 import SalarySetup from './components/SalarySetup';
 import Settings from './components/Settings';
 import DailyEntry from './components/DailyEntry';
@@ -10,6 +11,18 @@ function App() {
   const [user, setUser] = useState(null);
   const [activeTab, setActiveTab] = useState('entry');
   const [showSettings, setShowSettings] = useState(false);
+  const [resetToken, setResetToken] = useState(null);
+
+  // Check for reset password token in URL
+  useEffect(() => {
+    const path = window.location.pathname;
+    if (path.startsWith('/reset-password/')) {
+      const token = path.split('/reset-password/')[1];
+      if (token) {
+        setResetToken(token);
+      }
+    }
+  }, []);
 
   const handleLogin = (userData) => {
     setUser(userData);
@@ -27,6 +40,16 @@ function App() {
   const handleSettingsUpdate = (updatedUser) => {
     setUser(updatedUser);
   };
+
+  const handleResetComplete = () => {
+    setResetToken(null);
+    window.history.pushState({}, '', '/');
+  };
+
+  // Show reset password page if token is present
+  if (resetToken) {
+    return <ResetPassword token={resetToken} onComplete={handleResetComplete} />;
+  }
 
   // Show login if not authenticated
   if (!user) {
@@ -57,7 +80,7 @@ function App() {
             <img src="/logo.png" alt="WellBore" className="header-logo" />
             <div>
               <h1>Salary Calculator</h1>
-              <p>नमस्ते, {user.name}!</p>
+              <p>नमस्ते, {user.username}!</p>
             </div>
           </div>
           <div className="header-buttons">

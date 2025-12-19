@@ -19,14 +19,17 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    name: {
-        type: String,
-        required: true,
-        trim: true
-    },
     dailySalaryRate: {
         type: Number,
-        default: null  // null means not set yet
+        default: null
+    },
+    resetPasswordToken: {
+        type: String,
+        default: null
+    },
+    resetPasswordExpires: {
+        type: Date,
+        default: null
     }
 }, {
     timestamps: true

@@ -53,7 +53,7 @@ function Settings({ user, onUpdate, onBack }) {
             <div className="settings-card">
                 <h3>👤 प्रोफाइल / Profile</h3>
                 <div className="profile-info">
-                    <p><strong>नाम / Name:</strong> {user.name}</p>
+                    <p><strong>ईमेल / Email:</strong> {user.email}</p>
                     <p><strong>यूजरनेम / Username:</strong> {user.username}</p>
                 </div>
             </div>
