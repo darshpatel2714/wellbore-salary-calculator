@@ -48,9 +48,24 @@ function Login({ onLogin }) {
         }
     };
 
+    // Validate email format (proper format with real domain patterns)
     const validateEmail = (email) => {
-        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return re.test(email);
+        // Check for valid email format with proper domain
+        const re = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        if (!re.test(email)) return false;
+
+        // Check for common typos and invalid domains
+        const domain = email.split('@')[1];
+        if (!domain || domain.length < 4) return false; // min: a.co
+
+        // Must have at least one dot in domain
+        if (!domain.includes('.')) return false;
+
+        // Domain extension must be at least 2 characters
+        const extension = domain.split('.').pop();
+        if (!extension || extension.length < 2) return false;
+
+        return true;
     };
 
     const handleSubmit = async (e) => {
@@ -69,9 +84,9 @@ function Login({ onLogin }) {
             return;
         }
 
-        // Validate password
-        if (!password || password.length < 6) {
-            setMessage({ text: 'Password must be at least 6 characters / पासवर्ड 6 अक्षर का होना चाहिए', type: 'error' });
+        // Validate password (minimum 8 characters)
+        if (!password || password.length < 8) {
+            setMessage({ text: 'Password must be at least 8 characters / पासवर्ड 8 अक्षर का होना चाहिए', type: 'error' });
             return;
         }
 

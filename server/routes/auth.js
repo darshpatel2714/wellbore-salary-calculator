@@ -22,15 +22,29 @@ const configureTransporter = () => {
     return transporter;
 };
 
-// Validate email format
+// Validate email format (proper format with real domain patterns)
 const isValidEmail = (email) => {
-    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return re.test(email);
+    if (!email) return false;
+
+    // Check for valid email format with proper domain
+    const re = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!re.test(email)) return false;
+
+    // Check domain validity
+    const domain = email.split('@')[1];
+    if (!domain || domain.length < 4) return false; // min: a.co
+    if (!domain.includes('.')) return false;
+
+    // Domain extension must be at least 2 characters
+    const extension = domain.split('.').pop();
+    if (!extension || extension.length < 2) return false;
+
+    return true;
 };
 
-// Validate password (min 6 chars)
+// Validate password (min 8 chars)
 const isValidPassword = (password) => {
-    return password && password.length >= 6;
+    return password && password.length >= 8;
 };
 
 // POST - Signup
@@ -52,10 +66,10 @@ router.post('/signup', async (req, res) => {
             });
         }
 
-        // Validate password
+        // Validate password (minimum 8 characters)
         if (!isValidPassword(password)) {
             return res.status(400).json({
-                message: 'Password must be at least 6 characters / पासवर्ड 6 अक्षर का होना चाहिए'
+                message: 'Password must be at least 8 characters / पासवर्ड 8 अक्षर का होना चाहिए'
             });
         }
 
