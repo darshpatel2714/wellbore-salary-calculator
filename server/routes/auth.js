@@ -5,21 +5,19 @@ const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 
-// Email transporter (will be configured with user's email)
-let transporter = null;
-
-// Configure email transporter
-const configureTransporter = () => {
-    if (!transporter) {
-        transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
-                user: process.env.EMAIL_USER,
-                pass: process.env.EMAIL_PASS
-            }
-        });
-    }
-    return transporter;
+// Configure email transporter - creates fresh instance each time
+const createTransporter = () => {
+    console.log('Email config:', {
+        user: process.env.EMAIL_USER ? 'SET' : 'NOT SET',
+        pass: process.env.EMAIL_PASS ? 'SET' : 'NOT SET'
+    });
+    return nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS
+        }
+    });
 };
 
 // Validate email format (proper format with real domain patterns)
@@ -196,7 +194,7 @@ router.post('/forgot-password', async (req, res) => {
         await user.save();
 
         // Configure and send email
-        const mail = configureTransporter();
+        const mail = createTransporter();
 
         const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/reset-password/${resetToken}`;
 
