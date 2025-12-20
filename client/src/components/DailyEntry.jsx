@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getTodayDate, calculateHours } from '../utils/salaryCalculations';
 import { Icons } from './Icons';
+import CustomTimePicker from './CustomTimePicker';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 const FULL_DAY_HOURS = 8;
@@ -208,8 +209,7 @@ function DailyEntry({ userId, dailySalaryRate }) {
                     )}
                 </label>
                 <div className="time-input-wrapper">
-                    <input
-                        type="time"
+                    <CustomTimePicker
                         value={inTime}
                         onChange={handleInTimeChange}
                         className="time-input"
@@ -238,8 +238,7 @@ function DailyEntry({ userId, dailySalaryRate }) {
             <div className="form-group">
                 <label>जाने का समय / Out Time</label>
                 <div className="time-input-wrapper">
-                    <input
-                        type="time"
+                    <CustomTimePicker
                         value={outTime}
                         onChange={handleOutTimeChange}
                         className="time-input"
