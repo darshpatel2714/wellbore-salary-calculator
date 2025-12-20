@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { getTodayDate, calculateHours } from '../utils/salaryCalculations';
+import { Icons } from './Icons';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 const FULL_DAY_HOURS = 8;
@@ -57,6 +58,9 @@ function calculateSalaryWithRate(totalHours, dailyRate) {
     };
 }
 
+// Local storage key for pending in time
+const PENDING_INTIME_KEY = 'salaryApp_pendingInTime';
+
 function DailyEntry({ userId, dailySalaryRate }) {
     const [date] = useState(getTodayDate());
     const [inTime, setInTime] = useState('');
@@ -65,6 +69,46 @@ function DailyEntry({ userId, dailySalaryRate }) {
     const [message, setMessage] = useState({ text: '', type: '' });
     const [preview, setPreview] = useState(null);
     const [roundedTimes, setRoundedTimes] = useState({ inTime: '', outTime: '' });
+    const [hasPendingInTime, setHasPendingInTime] = useState(false);
+
+    // Load saved in time on mount (if same date)
+    useEffect(() => {
+        const saved = localStorage.getItem(PENDING_INTIME_KEY);
+        if (saved) {
+            try {
+                const { date: savedDate, inTime: savedInTime, userId: savedUserId } = JSON.parse(saved);
+                // Only restore if same date and same user
+                if (savedDate === date && savedUserId === userId && savedInTime) {
+                    setInTime(savedInTime);
+                    setHasPendingInTime(true);
+                } else if (savedDate !== date) {
+                    // Clear old data if date changed
+                    localStorage.removeItem(PENDING_INTIME_KEY);
+                }
+            } catch (e) {
+                localStorage.removeItem(PENDING_INTIME_KEY);
+            }
+        }
+    }, [date, userId]);
+
+    // Save in time to localStorage when it changes
+    const saveInTimeToStorage = (time) => {
+        if (time) {
+            localStorage.setItem(PENDING_INTIME_KEY, JSON.stringify({
+                date,
+                inTime: time,
+                userId,
+                savedAt: new Date().toISOString()
+            }));
+            setHasPendingInTime(true);
+        }
+    };
+
+    // Clear saved in time from localStorage
+    const clearSavedInTime = () => {
+        localStorage.removeItem(PENDING_INTIME_KEY);
+        setHasPendingInTime(false);
+    };
 
     // Calculate preview when times change
     const handleTimeChange = (newInTime, newOutTime) => {
@@ -90,6 +134,7 @@ function DailyEntry({ userId, dailySalaryRate }) {
     const handleInTimeChange = (e) => {
         const value = e.target.value;
         setInTime(value);
+        saveInTimeToStorage(value);
         handleTimeChange(value, outTime);
     };
 
@@ -118,11 +163,13 @@ function DailyEntry({ userId, dailySalaryRate }) {
             const data = await response.json();
 
             if (response.ok) {
-                setMessage({ text: '✅ सेव हो गया! Entry Saved!', type: 'success' });
+                setMessage({ text: 'Entry saved successfully!', type: 'success' });
                 setInTime('');
                 setOutTime('');
                 setPreview(null);
                 setRoundedTimes({ inTime: '', outTime: '' });
+                // Clear saved in time after successful save
+                clearSavedInTime();
             } else {
                 setMessage({ text: data.message, type: 'error' });
             }
@@ -135,10 +182,10 @@ function DailyEntry({ userId, dailySalaryRate }) {
 
     return (
         <div className="daily-entry">
-            <h2>📅 आज की एंट्री / Daily Entry</h2>
+            <h2><Icons.Calendar /> आज की एंट्री / Daily Entry</h2>
 
             <div className="salary-badge">
-                💰 आपकी सैलरी: ₹{dailySalaryRate?.toLocaleString('en-IN')}/day
+                <Icons.IndianRupee /> आपकी सैलरी: ₹{dailySalaryRate?.toLocaleString('en-IN')}/day
             </div>
 
             <div className="form-group">
@@ -152,40 +199,76 @@ function DailyEntry({ userId, dailySalaryRate }) {
             </div>
 
             <div className="form-group">
-                <label>आने का समय / In Time</label>
-                <input
-                    type="time"
-                    value={inTime}
-                    onChange={handleInTimeChange}
-                    className="time-input"
-                />
+                <label>
+                    आने का समय / In Time
+                    {hasPendingInTime && inTime && (
+                        <span className="saved-indicator">
+                            <Icons.CheckCircle /> Saved
+                        </span>
+                    )}
+                </label>
+                <div className="time-input-wrapper">
+                    <input
+                        type="time"
+                        value={inTime}
+                        onChange={handleInTimeChange}
+                        className="time-input"
+                    />
+                    <button
+                        type="button"
+                        className="now-btn in-btn"
+                        onClick={() => {
+                            const now = new Date();
+                            const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+                            setInTime(timeStr);
+                            saveInTimeToStorage(timeStr);
+                            handleTimeChange(timeStr, outTime);
+                        }}
+                    >
+                        IN
+                    </button>
+                </div>
                 {roundedTimes.inTime && inTime !== roundedTimes.inTime && (
                     <div className="rounded-time">
-                        ⏰ कंपनी टाइम: <strong>{roundedTimes.inTime}</strong>
+                        <Icons.Clock /> कंपनी टाइम: <strong>{roundedTimes.inTime}</strong>
                     </div>
                 )}
             </div>
 
             <div className="form-group">
                 <label>जाने का समय / Out Time</label>
-                <input
-                    type="time"
-                    value={outTime}
-                    onChange={handleOutTimeChange}
-                    className="time-input"
-                />
+                <div className="time-input-wrapper">
+                    <input
+                        type="time"
+                        value={outTime}
+                        onChange={handleOutTimeChange}
+                        className="time-input"
+                    />
+                    <button
+                        type="button"
+                        className="now-btn out-btn"
+                        onClick={() => {
+                            const now = new Date();
+                            const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+                            setOutTime(timeStr);
+                            handleTimeChange(inTime, timeStr);
+                        }}
+                    >
+                        OUT
+                    </button>
+                </div>
                 {roundedTimes.outTime && outTime !== roundedTimes.outTime && (
                     <div className="rounded-time">
-                        ⏰ कंपनी टाइम: <strong>{roundedTimes.outTime}</strong>
+                        <Icons.Clock /> कंपनी टाइम: <strong>{roundedTimes.outTime}</strong>
                     </div>
                 )}
             </div>
 
             {preview && (
                 <div className="preview-box">
-                    <h3>📊 आज का हिसाब / Today's Calculation</h3>
+                    <h3><Icons.TrendingUp /> आज का हिसाब / Today's Calculation</h3>
                     <div className="time-summary">
-                        🕐 {roundedTimes.inTime} → {roundedTimes.outTime} = {preview.presentHours + preview.otHours} hrs
+                        <Icons.Clock /> {roundedTimes.inTime} → {roundedTimes.outTime} = {preview.presentHours + preview.otHours} hrs
                     </div>
                     <div className="preview-grid">
                         <div className="preview-item">
@@ -218,6 +301,7 @@ function DailyEntry({ userId, dailySalaryRate }) {
 
             {message.text && (
                 <div className={`message ${message.type}`}>
+                    {message.type === 'success' ? <Icons.CheckCircle /> : <Icons.XCircle />}
                     {message.text}
                 </div>
             )}
@@ -227,7 +311,7 @@ function DailyEntry({ userId, dailySalaryRate }) {
                 onClick={handleSubmit}
                 disabled={loading}
             >
-                {loading ? '⏳ सेव हो रहा है...' : '💾 सेव करें / SAVE'}
+                {loading ? <><Icons.Loader /> सेव हो रहा है...</> : <><Icons.Save /> सेव करें / SAVE</>}
             </button>
         </div>
     );

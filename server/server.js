@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const entriesRouter = require('./routes/entries');
 const authRouter = require('./routes/auth');
+const adminRouter = require('./routes/admin');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -20,6 +21,7 @@ mongoose.connect(process.env.MONGODB_URI)
 // Routes
 app.use('/api/auth', authRouter);
 app.use('/api/entries', entriesRouter);
+app.use('/api/admin', adminRouter);
 
 // Health check
 app.get('/', (req, res) => {

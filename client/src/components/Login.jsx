@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Icons } from './Icons';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -159,7 +160,7 @@ function Login({ onLogin }) {
             const data = await response.json();
 
             if (response.ok) {
-                setMessage({ text: '✅ Password reset email sent! Check your inbox / ईमेल भेज दिया', type: 'success' });
+                setMessage({ text: 'Password reset email sent! Check your inbox / ईमेल भेज दिया', type: 'success' });
             } else {
                 setMessage({ text: data.message, type: 'error' });
             }
@@ -174,7 +175,7 @@ function Login({ onLogin }) {
         return (
             <div className="login-container">
                 <div className="login-box">
-                    <div className="loading">⏳ Loading...</div>
+                    <div className="loading"><Icons.Loader /> Loading...</div>
                 </div>
             </div>
         );
@@ -184,14 +185,14 @@ function Login({ onLogin }) {
         <div className="login-container">
             <div className="login-box">
                 <div className="login-header">
-                    <h1>💰 Salary Calculator</h1>
+                    <h1><Icons.Wallet /> Salary Calculator</h1>
                     <p>सैलरी कैलकुलेटर</p>
                 </div>
 
                 <h2>
-                    {mode === 'signup' && '📝 Sign Up / साइन अप'}
-                    {mode === 'login' && '🔐 Login / लॉगिन'}
-                    {mode === 'forgot' && '🔑 Forgot Password'}
+                    {mode === 'signup' && <><Icons.UserPlus /> Sign Up / साइन अप</>}
+                    {mode === 'login' && <><Icons.Lock /> Login / लॉगिन</>}
+                    {mode === 'forgot' && <><Icons.Key /> Forgot Password</>}
                 </h2>
 
                 <form onSubmit={handleSubmit}>
@@ -238,7 +239,7 @@ function Login({ onLogin }) {
                                     className="password-toggle"
                                     onClick={() => setShowPassword(!showPassword)}
                                 >
-                                    {showPassword ? '🙈' : '👁️'}
+                                    {showPassword ? <Icons.EyeOff /> : <Icons.Eye />}
                                 </button>
                             </div>
                         </div>
@@ -261,7 +262,7 @@ function Login({ onLogin }) {
                                     className="password-toggle"
                                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                                 >
-                                    {showConfirmPassword ? '🙈' : '👁️'}
+                                    {showConfirmPassword ? <Icons.EyeOff /> : <Icons.Eye />}
                                 </button>
                             </div>
                         </div>
@@ -289,19 +290,21 @@ function Login({ onLogin }) {
 
                     {message.text && (
                         <div className={`message ${message.type}`}>
+                            {message.type === 'success' ? <Icons.CheckCircle /> : <Icons.XCircle />}
                             {message.text}
                         </div>
                     )}
 
                     <button type="submit" className="login-btn" disabled={loading}>
-                        {loading
-                            ? '⏳ Please wait...'
-                            : mode === 'signup'
-                                ? '📝 Sign Up / साइन अप करें'
-                                : mode === 'forgot'
-                                    ? '📧 Send Reset Link / लिंक भेजें'
-                                    : '🔐 Login / लॉगिन करें'
-                        }
+                        {loading ? (
+                            <><Icons.Loader /> Please wait...</>
+                        ) : mode === 'signup' ? (
+                            <><Icons.UserPlus /> Sign Up / साइन अप करें</>
+                        ) : mode === 'forgot' ? (
+                            <><Icons.Mail /> Send Reset Link / लिंक भेजें</>
+                        ) : (
+                            <><Icons.Lock /> Login / लॉगिन करें</>
+                        )}
                     </button>
                 </form>
 

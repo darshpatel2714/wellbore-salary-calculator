@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Icons } from './Icons';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -34,7 +35,7 @@ function Settings({ user, onUpdate, onBack }) {
             const data = await response.json();
 
             if (response.ok) {
-                setMessage({ text: '✅ सैलरी अपडेट हो गई! नई एंट्री में नई सैलरी लागू होगी।', type: 'success' });
+                setMessage({ text: 'Salary updated successfully! New entries will use the new salary.', type: 'success' });
                 onUpdate(data.user);
             } else {
                 setMessage({ text: data.message, type: 'error' });
@@ -48,18 +49,10 @@ function Settings({ user, onUpdate, onBack }) {
 
     return (
         <div className="settings">
-            <h2>⚙️ सेटिंग्स / Settings</h2>
+            <h2><Icons.Settings /> सेटिंग्स / Settings</h2>
 
             <div className="settings-card">
-                <h3>👤 प्रोफाइल / Profile</h3>
-                <div className="profile-info">
-                    <p><strong>ईमेल / Email:</strong> {user.email}</p>
-                    <p><strong>यूजरनेम / Username:</strong> {user.username}</p>
-                </div>
-            </div>
-
-            <div className="settings-card">
-                <h3>💰 सैलरी सेटिंग / Salary Settings</h3>
+                <h3><Icons.IndianRupee /> सैलरी सेटिंग / Salary Settings</h3>
 
                 <div className="current-salary">
                     <p>वर्तमान 8-घंटे सैलरी / Current 8-Hour Salary:</p>
@@ -89,23 +82,24 @@ function Settings({ user, onUpdate, onBack }) {
 
                     {message.text && (
                         <div className={`message ${message.type}`}>
+                            {message.type === 'success' ? <Icons.CheckCircle /> : <Icons.XCircle />}
                             {message.text}
                         </div>
                     )}
 
                     <div className="settings-note">
-                        <p>⚠️ सैलरी बदलने पर पुरानी एंट्री नहीं बदलेंगी</p>
+                        <p><Icons.AlertTriangle /> सैलरी बदलने पर पुरानी एंट्री नहीं बदलेंगी</p>
                         <p>Old entries will not change when salary is updated</p>
                     </div>
 
                     <button type="submit" className="save-btn" disabled={loading}>
-                        {loading ? '⏳ अपडेट हो रहा है...' : '💾 सैलरी अपडेट करें'}
+                        {loading ? <><Icons.Loader /> अपडेट हो रहा है...</> : <><Icons.Save /> सैलरी अपडेट करें</>}
                     </button>
                 </form>
             </div>
 
             <button className="back-btn" onClick={onBack}>
-                ← वापस जाएं / Go Back
+                <Icons.ArrowLeft /> वापस जाएं / Go Back
             </button>
         </div>
     );

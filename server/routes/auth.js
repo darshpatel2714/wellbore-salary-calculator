@@ -310,4 +310,55 @@ router.put('/salary', async (req, res) => {
     }
 });
 
+// PUT - Update username
+router.put('/username', async (req, res) => {
+    try {
+        const { userId, username } = req.body;
+
+        // Validate username
+        if (!username || username.length < 3) {
+            return res.status(400).json({
+                message: 'Username must be at least 3 characters / यूजरनेम 3 अक्षर का होना चाहिए'
+            });
+        }
+
+        // Check if username already exists
+        const existingUser = await User.findOne({
+            username: username.toLowerCase(),
+            _id: { $ne: userId }
+        });
+
+        if (existingUser) {
+            return res.status(400).json({
+                message: 'Username already exists / यह यूजरनेम पहले से है'
+            });
+        }
+
+        const user = await User.findByIdAndUpdate(
+            userId,
+            { username: username.toLowerCase() },
+            { new: true }
+        );
+
+        if (!user) {
+            return res.status(404).json({
+                message: 'User not found / यूजर नहीं मिला'
+            });
+        }
+
+        res.json({
+            message: 'Username updated / यूजरनेम अपडेट हो गया',
+            user: {
+                id: user._id,
+                email: user.email,
+                username: user.username,
+                dailySalaryRate: user.dailySalaryRate
+            }
+        });
+    } catch (error) {
+        console.error('Update username error:', error);
+        res.status(500).json({ message: 'Server error / सर्वर में समस्या' });
+    }
+});
+
 module.exports = router;

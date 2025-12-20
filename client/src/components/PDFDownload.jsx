@@ -1,40 +1,28 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { formatDateDisplay } from '../utils/salaryCalculations';
+import { Icons } from './Icons';
 
 function PDFDownload({ entries, month, year, monthlyTotal }) {
 
     const generatePDF = async () => {
         const doc = new jsPDF('p', 'mm', 'a4');
 
-        // Load logo image
-        try {
-            const logoImg = new Image();
-            logoImg.src = '/logo.png';
-
-            await new Promise((resolve, reject) => {
-                logoImg.onload = resolve;
-                logoImg.onerror = reject;
-            });
-
-            // Add logo to PDF (left side)
-            doc.addImage(logoImg, 'PNG', 15, 10, 35, 15);
-        } catch (e) {
-            console.log('Logo could not be loaded for PDF');
-        }
-
-        // Company name (next to logo)
-        doc.setFontSize(14);
-        doc.setFont(undefined, 'bold');
-        doc.text('WellBore Engineering Co.', 55, 18);
-
         // Title
-        doc.setFontSize(16);
-        doc.text(`Salary Slip - ${month} ${year}`, 105, 35, { align: 'center' });
+        doc.setFontSize(18);
+        doc.setFont(undefined, 'bold');
+        doc.setTextColor(99, 102, 241); // Primary color
+        doc.text('Salary Calculator', 105, 18, { align: 'center' });
+
+        // Subtitle
+        doc.setFontSize(14);
+        doc.setTextColor(0, 0, 0);
+        doc.text(`Salary Slip - ${month} ${year}`, 105, 28, { align: 'center' });
+
 
         // Horizontal line
         doc.setLineWidth(0.5);
-        doc.line(15, 40, 195, 40);
+        doc.line(15, 33, 195, 33);
 
         // Table data
         const tableData = entries.map(entry => [
@@ -51,7 +39,7 @@ function PDFDownload({ entries, month, year, monthlyTotal }) {
 
         // Generate table
         autoTable(doc, {
-            startY: 45,
+            startY: 38,
             head: [[
                 'Date', 'In Time', 'Out Time', 'Present Hrs', 'OT Hrs',
                 'Present Amt', 'OT Amt', 'PF', 'Daily Salary'
@@ -99,7 +87,7 @@ function PDFDownload({ entries, month, year, monthlyTotal }) {
 
     return (
         <button className="pdf-btn" onClick={generatePDF}>
-            📄 PDF डाउनलोड करें / Download PDF
+            <Icons.FileDown /> PDF डाउनलोड करें / Download PDF
         </button>
     );
 }

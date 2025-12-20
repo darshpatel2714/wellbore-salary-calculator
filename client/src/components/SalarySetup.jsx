@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Icons } from './Icons';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -41,15 +42,15 @@ function SalarySetup({ userId, onComplete }) {
     };
 
     return (
-        <div className="salary-setup">
+        <div className="login-container">
             <div className="setup-box">
                 <div className="setup-header">
-                    <h1>💰 सैलरी सेटअप</h1>
+                    <h1><Icons.IndianRupee /> सैलरी सेटअप</h1>
                     <p>Salary Setup</p>
                 </div>
 
                 <div className="setup-info">
-                    <p>🎯 एक बार अपनी <strong>8 घंटे की सैलरी</strong> बताएं</p>
+                    <p><Icons.Calculator /> एक बार अपनी <strong>8 घंटे की सैलरी</strong> बताएं</p>
                     <p>Enter your <strong>full day (8 hours) salary</strong> once</p>
                 </div>
 
@@ -78,17 +79,18 @@ function SalarySetup({ userId, onComplete }) {
 
                     {message.text && (
                         <div className={`message ${message.type}`}>
+                            {message.type === 'success' ? <Icons.CheckCircle /> : <Icons.XCircle />}
                             {message.text}
                         </div>
                     )}
 
                     <button type="submit" className="setup-btn" disabled={loading}>
-                        {loading ? '⏳ सेव हो रहा है...' : '✅ सेव करें और आगे बढ़ें'}
+                        {loading ? <><Icons.Loader /> सेव हो रहा है...</> : <><Icons.CheckCircle /> सेव करें और आगे बढ़ें</>}
                     </button>
                 </form>
 
-                <div className="setup-note">
-                    <p>📝 आप बाद में Settings में सैलरी बदल सकते हैं</p>
+                <div className="settings-note">
+                    <p><Icons.Edit /> आप बाद में Settings में सैलरी बदल सकते हैं</p>
                     <p>You can change salary later in Settings</p>
                 </div>
             </div>

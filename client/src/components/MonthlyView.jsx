@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { formatDateDisplay } from '../utils/salaryCalculations';
+import { Icons } from './Icons';
 import PDFDownload from './PDFDownload';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
@@ -10,7 +11,7 @@ function MonthlyView({ userId }) {
     const [entries, setEntries] = useState([]);
     const [monthlyTotal, setMonthlyTotal] = useState(0);
     const [loading, setLoading] = useState(false);
-    const [deleteMessage, setDeleteMessage] = useState('');
+    const [deleteMessage, setDeleteMessage] = useState({ text: '', type: '' });
     const [confirmDelete, setConfirmDelete] = useState(null);
 
     const months = [
@@ -60,19 +61,17 @@ function MonthlyView({ userId }) {
             const data = await response.json();
 
             if (response.ok) {
-                setDeleteMessage('✅ एंट्री डिलीट हो गई / Entry deleted!');
+                setDeleteMessage({ text: 'Entry deleted successfully!', type: 'success' });
                 setConfirmDelete(null);
-                // Refresh entries to recalculate totals
                 fetchEntries();
-                // Clear message after 3 seconds
-                setTimeout(() => setDeleteMessage(''), 3000);
+                setTimeout(() => setDeleteMessage({ text: '', type: '' }), 3000);
             } else {
-                setDeleteMessage('❌ ' + data.message);
-                setTimeout(() => setDeleteMessage(''), 3000);
+                setDeleteMessage({ text: data.message, type: 'error' });
+                setTimeout(() => setDeleteMessage({ text: '', type: '' }), 3000);
             }
         } catch (error) {
-            setDeleteMessage('❌ Server से कनेक्ट नहीं हो पाया');
-            setTimeout(() => setDeleteMessage(''), 3000);
+            setDeleteMessage({ text: 'Server से कनेक्ट नहीं हो पाया', type: 'error' });
+            setTimeout(() => setDeleteMessage({ text: '', type: '' }), 3000);
         }
     };
 
@@ -82,7 +81,7 @@ function MonthlyView({ userId }) {
 
     return (
         <div className="monthly-view">
-            <h2>📊 महीने का हिसाब / Monthly View</h2>
+            <h2><Icons.BarChart /> महीने का हिसाब / Monthly View</h2>
 
             <div className="filters">
                 <div className="filter-group">
@@ -104,9 +103,10 @@ function MonthlyView({ userId }) {
                 </div>
             </div>
 
-            {deleteMessage && (
-                <div className={`delete-message ${deleteMessage.includes('✅') ? 'success' : 'error'}`}>
-                    {deleteMessage}
+            {deleteMessage.text && (
+                <div className={`delete-message ${deleteMessage.type}`}>
+                    {deleteMessage.type === 'success' ? <Icons.CheckCircle /> : <Icons.XCircle />}
+                    {deleteMessage.text}
                 </div>
             )}
 
@@ -114,7 +114,7 @@ function MonthlyView({ userId }) {
             {confirmDelete && (
                 <div className="confirm-modal-overlay">
                     <div className="confirm-modal">
-                        <h3>⚠️ क्या आप सच में डिलीट करना चाहते हैं?</h3>
+                        <h3><Icons.AlertTriangle /> क्या आप सच में डिलीट करना चाहते हैं?</h3>
                         <p>Are you sure you want to delete this entry?</p>
                         <div className="confirm-details">
                             <p><strong>तारीख:</strong> {formatDateDisplay(confirmDelete.date)}</p>
@@ -123,10 +123,10 @@ function MonthlyView({ userId }) {
                         </div>
                         <div className="confirm-buttons">
                             <button className="cancel-btn" onClick={handleCancelDelete}>
-                                ❌ रद्द करें / Cancel
+                                <Icons.XCircle /> रद्द करें / Cancel
                             </button>
                             <button className="delete-confirm-btn" onClick={handleConfirmDelete}>
-                                🗑️ हाँ, डिलीट करें / Yes, Delete
+                                <Icons.Trash2 /> हाँ, डिलीट करें / Yes, Delete
                             </button>
                         </div>
                     </div>
@@ -134,7 +134,7 @@ function MonthlyView({ userId }) {
             )}
 
             {loading ? (
-                <div className="loading">⏳ लोड हो रहा है...</div>
+                <div className="loading"><Icons.Loader /> लोड हो रहा है...</div>
             ) : entries.length === 0 ? (
                 <div className="no-data">इस महीने कोई एंट्री नहीं है / No entries this month</div>
             ) : (
@@ -152,7 +152,7 @@ function MonthlyView({ userId }) {
                                     <th>OT₹</th>
                                     <th>PF</th>
                                     <th>Total</th>
-                                    <th>🗑️</th>
+                                    <th></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -173,7 +173,7 @@ function MonthlyView({ userId }) {
                                                 onClick={() => handleDeleteClick(entry)}
                                                 title="Delete Entry"
                                             >
-                                                🗑️
+                                                <Icons.Trash2 />
                                             </button>
                                         </td>
                                     </tr>
@@ -183,7 +183,7 @@ function MonthlyView({ userId }) {
                     </div>
 
                     <div className="monthly-total">
-                        <span>🎯 महीने की कुल सैलरी / Monthly Total:</span>
+                        <span><Icons.TrendingUp /> महीने की कुल सैलरी / Monthly Total:</span>
                         <span className="total-amount">₹{monthlyTotal.toLocaleString('en-IN')}</span>
                     </div>
 
