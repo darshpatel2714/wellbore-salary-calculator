@@ -3,10 +3,10 @@ import { Icons } from './Icons';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
-function AdminDashboard({ onLogout }) {
+function AdminDashboard({ admin, onLogout }) {
     const [activeTab, setActiveTab] = useState('users');
     const [users, setUsers] = useState([]);
-    const [stats, setStats] = useState({ totalUsers: 0, totalEntries: 0, totalSalaryPaid: 0 });
+    const [stats, setStats] = useState({ totalUsers: 0, totalEntries: 0, totalSalaryPaid: 0, pfPercentage: 12 });
     const [loading, setLoading] = useState(true);
     const [selectedUser, setSelectedUser] = useState(null);
     const [userEntries, setUserEntries] = useState([]);
@@ -14,6 +14,8 @@ function AdminDashboard({ onLogout }) {
     const [editForm, setEditForm] = useState({ username: '', dailySalaryRate: '' });
     const [message, setMessage] = useState({ text: '', type: '' });
     const [searchTerm, setSearchTerm] = useState('');
+    const [editingPf, setEditingPf] = useState(false);
+    const [newPfValue, setNewPfValue] = useState('');
 
     // Fetch users on mount
     useEffect(() => {
@@ -27,13 +29,38 @@ function AdminDashboard({ onLogout }) {
             const data = await response.json();
             if (response.ok) {
                 setUsers(data.users || []);
-                setStats(data.stats || { totalUsers: 0, totalEntries: 0, totalSalaryPaid: 0 });
+                setStats(data.stats || { totalUsers: 0, totalEntries: 0, totalSalaryPaid: 0, pfPercentage: 12 });
+                setNewPfValue(data.stats?.pfPercentage || 12);
             }
         } catch (error) {
             console.error('Error fetching users:', error);
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleUpdatePf = async () => {
+        try {
+            const response = await fetch(`${API_URL}/api/admin/settings/pf`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ pfPercentage: parseFloat(newPfValue), adminId: admin?.id })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                setMessage({ text: 'PF percentage updated successfully!', type: 'success' });
+                setStats({ ...stats, pfPercentage: data.pfPercentage });
+                setEditingPf(false);
+            } else {
+                setMessage({ text: data.message, type: 'error' });
+            }
+        } catch (error) {
+            setMessage({ text: 'Server error', type: 'error' });
+        }
+
+        setTimeout(() => setMessage({ text: '', type: '' }), 3000);
     };
 
     const fetchUserEntries = async (userId) => {
@@ -180,6 +207,44 @@ function AdminDashboard({ onLogout }) {
                     <div className="stat-info">
                         <span className="stat-value">₹{stats.totalSalaryPaid?.toLocaleString('en-IN')}</span>
                         <span className="stat-label">Total Salary Paid</span>
+                    </div>
+                </div>
+                {/* PF Settings Card */}
+                <div className="stat-card pf-card">
+                    <div className="stat-icon pf">
+                        <Icons.Calculator />
+                    </div>
+                    <div className="stat-info">
+                        {editingPf ? (
+                            <div className="pf-edit-form">
+                                <input
+                                    type="number"
+                                    value={newPfValue}
+                                    onChange={(e) => setNewPfValue(e.target.value)}
+                                    min="0"
+                                    max="50"
+                                    step="0.5"
+                                    className="pf-input"
+                                />
+                                <span>%</span>
+                                <button className="pf-save-btn" onClick={handleUpdatePf}>
+                                    <Icons.CheckCircle />
+                                </button>
+                                <button className="pf-cancel-btn" onClick={() => { setEditingPf(false); setNewPfValue(stats.pfPercentage); }}>
+                                    <Icons.XCircle />
+                                </button>
+                            </div>
+                        ) : (
+                            <>
+                                <span className="stat-value">{stats.pfPercentage}%</span>
+                                <span className="stat-label">
+                                    PF Rate
+                                    <button className="pf-edit-btn" onClick={() => setEditingPf(true)}>
+                                        <Icons.Edit />
+                                    </button>
+                                </span>
+                            </>
+                        )}
                     </div>
                 </div>
             </div>

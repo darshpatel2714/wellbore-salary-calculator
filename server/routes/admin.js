@@ -2,7 +2,11 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
 const Entry = require('../models/Entry');
+const Settings = require('../models/Settings');
 const bcrypt = require('bcryptjs');
+
+// Default PF percentage
+const DEFAULT_PF_RATE = 12;
 
 // Admin Login
 router.post('/login', async (req, res) => {
@@ -43,6 +47,48 @@ router.post('/login', async (req, res) => {
     }
 });
 
+// Get PF percentage
+router.get('/settings/pf', async (req, res) => {
+    try {
+        const setting = await Settings.findOne({ key: 'pfPercentage' });
+        res.json({
+            pfPercentage: setting ? setting.value : DEFAULT_PF_RATE
+        });
+    } catch (error) {
+        console.error('Get PF error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// Update PF percentage
+router.put('/settings/pf', async (req, res) => {
+    try {
+        const { pfPercentage, adminId } = req.body;
+
+        if (pfPercentage === undefined || pfPercentage < 0 || pfPercentage > 50) {
+            return res.status(400).json({ message: 'PF percentage must be between 0 and 50' });
+        }
+
+        const setting = await Settings.findOneAndUpdate(
+            { key: 'pfPercentage' },
+            {
+                key: 'pfPercentage',
+                value: pfPercentage,
+                updatedBy: adminId
+            },
+            { upsert: true, new: true }
+        );
+
+        res.json({
+            message: 'PF percentage updated successfully',
+            pfPercentage: setting.value
+        });
+    } catch (error) {
+        console.error('Update PF error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
 // Get all users with stats
 router.get('/users', async (req, res) => {
     try {
@@ -76,12 +122,16 @@ router.get('/users', async (req, res) => {
             { $group: { _id: null, total: { $sum: '$dailySalary' } } }
         ]);
 
+        // Get PF setting
+        const pfSetting = await Settings.findOne({ key: 'pfPercentage' });
+
         res.json({
             users: usersWithStats,
             stats: {
                 totalUsers,
                 totalEntries,
-                totalSalaryPaid: totalSalaryPaid[0]?.total || 0
+                totalSalaryPaid: totalSalaryPaid[0]?.total || 0,
+                pfPercentage: pfSetting ? pfSetting.value : DEFAULT_PF_RATE
             }
         });
     } catch (error) {

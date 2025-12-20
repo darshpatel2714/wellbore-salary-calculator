@@ -2,9 +2,32 @@ const express = require('express');
 const router = express.Router();
 const Entry = require('../models/Entry');
 const User = require('../models/User');
+const Settings = require('../models/Settings');
 
 const FULL_DAY_HOURS = 8;
-const PF_RATE = 0.12;
+const DEFAULT_PF_RATE = 0.12;
+
+// Get current PF rate from database
+async function getPfRate() {
+    try {
+        const setting = await Settings.findOne({ key: 'pfPercentage' });
+        return setting ? setting.value / 100 : DEFAULT_PF_RATE;
+    } catch (error) {
+        return DEFAULT_PF_RATE;
+    }
+}
+
+// Public route to get current PF percentage
+router.get('/settings/pf', async (req, res) => {
+    try {
+        const setting = await Settings.findOne({ key: 'pfPercentage' });
+        res.json({
+            pfPercentage: setting ? setting.value : 12
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error' });
+    }
+});
 
 // Round time according to company rules:
 // >45 minutes → round up to next hour
@@ -49,8 +72,8 @@ function calculateHours(inTime, outTime) {
     return (outMinutes - inMinutes) / 60;
 }
 
-// Calculate salary details using user's daily rate
-function calculateSalary(totalHours, dailyRate) {
+// Calculate salary details using user's daily rate and dynamic PF
+function calculateSalary(totalHours, dailyRate, pfRate) {
     const hourlyRate = dailyRate / FULL_DAY_HOURS;
     const presentHours = Math.min(FULL_DAY_HOURS, totalHours);
     const otHours = Math.max(0, totalHours - FULL_DAY_HOURS);
@@ -63,7 +86,7 @@ function calculateSalary(totalHours, dailyRate) {
     const otAmount = otHours * hourlyRate;
 
     // PF is ONLY on present amount, NOT on OT
-    const pf = presentAmount * PF_RATE;
+    const pf = presentAmount * pfRate;
 
     const dailySalary = (presentAmount + otAmount) - pf;
 
@@ -128,7 +151,9 @@ router.post('/', async (req, res) => {
             });
         }
 
-        const salaryDetails = calculateSalary(totalHours, user.dailySalaryRate);
+        // Get current PF rate
+        const pfRate = await getPfRate();
+        const salaryDetails = calculateSalary(totalHours, user.dailySalaryRate, pfRate);
 
         const entry = new Entry({
             userId,
