@@ -1,157 +1,154 @@
 import { useState, useRef, useEffect } from 'react';
-import { Icons } from './Icons';
 
-// Custom Time Picker - Same look on mobile and desktop
+// Windows-style scroll wheel time picker
 function CustomTimePicker({ value, onChange, className }) {
-    const [hours, setHours] = useState('');
-    const [minutes, setMinutes] = useState('');
-    const [showDropdown, setShowDropdown] = useState(false);
+    const [showPicker, setShowPicker] = useState(false);
+    const [selectedHour, setSelectedHour] = useState(10);
+    const [selectedMinute, setSelectedMinute] = useState(0);
+    const [period, setPeriod] = useState('AM');
     const containerRef = useRef(null);
+    const hourRef = useRef(null);
+    const minuteRef = useRef(null);
 
-    // Parse incoming value
+    // Generate hours 01-12
+    const hours = Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, '0'));
+    // Generate minutes 00-59
+    const minutes = Array.from({ length: 60 }, (_, i) => String(i).padStart(2, '0'));
+
+    // Parse incoming 24h value
     useEffect(() => {
         if (value) {
-            const [h, m] = value.split(':');
-            setHours(h || '');
-            setMinutes(m || '');
-        } else {
-            setHours('');
-            setMinutes('');
+            const [h, m] = value.split(':').map(Number);
+            if (!isNaN(h) && !isNaN(m)) {
+                if (h === 0) {
+                    setSelectedHour(12);
+                    setPeriod('AM');
+                } else if (h === 12) {
+                    setSelectedHour(12);
+                    setPeriod('PM');
+                } else if (h > 12) {
+                    setSelectedHour(h - 12);
+                    setPeriod('PM');
+                } else {
+                    setSelectedHour(h);
+                    setPeriod('AM');
+                }
+                setSelectedMinute(m);
+            }
         }
     }, [value]);
 
-    // Close dropdown on outside click
+    // Close on outside click
     useEffect(() => {
         const handleClickOutside = (e) => {
             if (containerRef.current && !containerRef.current.contains(e.target)) {
-                setShowDropdown(false);
+                setShowPicker(false);
             }
         };
         document.addEventListener('click', handleClickOutside);
         return () => document.removeEventListener('click', handleClickOutside);
     }, []);
 
-    const updateTime = (newHours, newMinutes) => {
-        const h = newHours.padStart(2, '0');
-        const m = newMinutes.padStart(2, '0');
-        onChange({ target: { value: `${h}:${m}` } });
+    // Scroll to selected item when picker opens
+    useEffect(() => {
+        if (showPicker) {
+            if (hourRef.current) {
+                const index = selectedHour - 1;
+                hourRef.current.scrollTop = index * 44 - 44;
+            }
+            if (minuteRef.current) {
+                minuteRef.current.scrollTop = selectedMinute * 44 - 44;
+            }
+        }
+    }, [showPicker]);
+
+    const handleConfirm = () => {
+        let hour24 = selectedHour;
+        if (period === 'AM') {
+            if (selectedHour === 12) hour24 = 0;
+            else hour24 = selectedHour;
+        } else {
+            if (selectedHour === 12) hour24 = 12;
+            else hour24 = selectedHour + 12;
+        }
+        const timeStr = `${String(hour24).padStart(2, '0')}:${String(selectedMinute).padStart(2, '0')}`;
+        onChange({ target: { value: timeStr } });
+        setShowPicker(false);
     };
 
-    const handleHoursChange = (e) => {
-        let val = e.target.value.replace(/\D/g, '');
-        if (val.length > 2) val = val.slice(0, 2);
-        if (parseInt(val) > 23) val = '23';
-        setHours(val);
-        if (val.length === 2 && minutes) {
-            updateTime(val, minutes);
-        }
-    };
-
-    const handleMinutesChange = (e) => {
-        let val = e.target.value.replace(/\D/g, '');
-        if (val.length > 2) val = val.slice(0, 2);
-        if (parseInt(val) > 59) val = '59';
-        setMinutes(val);
-        if (val.length === 2 && hours) {
-            updateTime(hours, val);
-        }
-    };
-
-    const handleHoursBlur = () => {
-        if (hours && minutes) {
-            updateTime(hours, minutes);
-        }
-    };
-
-    const handleMinutesBlur = () => {
-        if (hours && minutes) {
-            updateTime(hours, minutes);
-        }
-    };
-
-    // Quick select hours
-    const hourOptions = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'));
-    // Quick select minutes (every 15 min)
-    const minuteOptions = ['00', '15', '30', '45'];
-
-    const selectHour = (h) => {
-        setHours(h);
-        if (minutes) {
-            updateTime(h, minutes);
-        }
-    };
-
-    const selectMinute = (m) => {
-        setMinutes(m);
-        if (hours) {
-            updateTime(hours, m);
-            setShowDropdown(false);
-        }
+    const formatDisplayTime = () => {
+        if (!value) return '-- : -- --';
+        const [h, m] = value.split(':');
+        if (!h || !m) return '-- : -- --';
+        let hour = parseInt(h);
+        const p = hour >= 12 ? 'PM' : 'AM';
+        if (hour === 0) hour = 12;
+        else if (hour > 12) hour = hour - 12;
+        return `${String(hour).padStart(2, '0')} : ${m} ${p}`;
     };
 
     return (
-        <div className={`custom-time-picker ${className || ''}`} ref={containerRef}>
-            <div className="time-display" onClick={() => setShowDropdown(!showDropdown)}>
-                <input
-                    type="text"
-                    inputMode="numeric"
-                    pattern="[0-9]*"
-                    value={hours}
-                    onChange={handleHoursChange}
-                    onBlur={handleHoursBlur}
-                    placeholder="HH"
-                    maxLength={2}
-                    className="time-digit"
-                />
-                <span className="time-separator">:</span>
-                <input
-                    type="text"
-                    inputMode="numeric"
-                    pattern="[0-9]*"
-                    value={minutes}
-                    onChange={handleMinutesChange}
-                    onBlur={handleMinutesBlur}
-                    placeholder="MM"
-                    maxLength={2}
-                    className="time-digit"
-                />
-                <button type="button" className="time-dropdown-btn" onClick={(e) => { e.stopPropagation(); setShowDropdown(!showDropdown); }}>
-                    <Icons.Clock />
-                </button>
+        <div className={`windows-time-picker ${className || ''}`} ref={containerRef}>
+            {/* Display Box */}
+            <div className="time-display-box" onClick={() => setShowPicker(!showPicker)}>
+                <span className="time-text">{formatDisplayTime()}</span>
+                <span className="time-icon">🕐</span>
             </div>
 
-            {showDropdown && (
-                <div className="time-dropdown">
-                    <div className="time-dropdown-section">
-                        <div className="time-dropdown-label">Hour</div>
-                        <div className="time-options hours-options">
-                            {hourOptions.map(h => (
-                                <button
+            {/* Picker Modal */}
+            {showPicker && (
+                <div className="time-picker-modal">
+                    <div className="picker-columns">
+                        {/* Hour Column */}
+                        <div className="picker-column" ref={hourRef}>
+                            {hours.map((h, i) => (
+                                <div
                                     key={h}
-                                    type="button"
-                                    className={`time-option ${hours === h ? 'selected' : ''}`}
-                                    onClick={() => selectHour(h)}
+                                    className={`picker-item ${selectedHour === i + 1 ? 'selected' : ''}`}
+                                    onClick={() => setSelectedHour(i + 1)}
                                 >
                                     {h}
-                                </button>
+                                </div>
                             ))}
                         </div>
-                    </div>
-                    <div className="time-dropdown-section">
-                        <div className="time-dropdown-label">Minute</div>
-                        <div className="time-options minutes-options">
-                            {minuteOptions.map(m => (
-                                <button
+
+                        {/* Minute Column */}
+                        <div className="picker-column" ref={minuteRef}>
+                            {minutes.map((m, i) => (
+                                <div
                                     key={m}
-                                    type="button"
-                                    className={`time-option ${minutes === m ? 'selected' : ''}`}
-                                    onClick={() => selectMinute(m)}
+                                    className={`picker-item ${selectedMinute === i ? 'selected' : ''}`}
+                                    onClick={() => setSelectedMinute(i)}
                                 >
                                     {m}
-                                </button>
+                                </div>
                             ))}
                         </div>
+
+                        {/* AM/PM Column */}
+                        <div className="picker-column period-column">
+                            <div
+                                className={`picker-item ${period === 'AM' ? 'selected' : ''}`}
+                                onClick={() => setPeriod('AM')}
+                            >
+                                AM
+                            </div>
+                            <div
+                                className={`picker-item ${period === 'PM' ? 'selected' : ''}`}
+                                onClick={() => setPeriod('PM')}
+                            >
+                                PM
+                            </div>
+                        </div>
                     </div>
+
+                    {/* Selection Highlight */}
+                    <div className="selection-highlight"></div>
+
+                    {/* Confirm Button */}
+                    <button type="button" className="confirm-btn" onClick={handleConfirm}>
+                        ✓ Set Time
+                    </button>
                 </div>
             )}
         </div>
