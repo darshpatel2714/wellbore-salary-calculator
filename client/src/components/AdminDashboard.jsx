@@ -11,7 +11,7 @@ function AdminDashboard({ admin, onLogout }) {
     const [selectedUser, setSelectedUser] = useState(null);
     const [userEntries, setUserEntries] = useState([]);
     const [editingUser, setEditingUser] = useState(null);
-    const [editForm, setEditForm] = useState({ username: '', dailySalaryRate: '' });
+    const [editForm, setEditForm] = useState({ username: '', dailySalaryRate: '', pfNumber: '', empCode: '', department: '', designation: '' });
     const [message, setMessage] = useState({ text: '', type: '' });
     const [searchTerm, setSearchTerm] = useState('');
     const [editingPf, setEditingPf] = useState(false);
@@ -78,7 +78,14 @@ function AdminDashboard({ admin, onLogout }) {
 
     const handleEditUser = (user) => {
         setEditingUser(user);
-        setEditForm({ username: user.username, dailySalaryRate: user.dailySalaryRate || '' });
+        setEditForm({
+            username: user.username,
+            dailySalaryRate: user.dailySalaryRate || '',
+            pfNumber: user.pfNumber || '',
+            empCode: user.empCode || '',
+            department: user.department || '',
+            designation: user.designation || ''
+        });
     };
 
     const handleSaveUser = async () => {
@@ -438,6 +445,45 @@ function AdminDashboard({ admin, onLogout }) {
                                     value={editForm.dailySalaryRate}
                                     onChange={(e) => setEditForm({ ...editForm, dailySalaryRate: e.target.value })}
                                 />
+                            </div>
+                            <div className="form-group">
+                                <label>PF Number</label>
+                                <input
+                                    type="text"
+                                    value={editForm.pfNumber}
+                                    onChange={(e) => setEditForm({ ...editForm, pfNumber: e.target.value })}
+                                    placeholder="e.g. GJAHD0019137000/105"
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label>Emp Code</label>
+                                <input
+                                    type="text"
+                                    value={editForm.empCode}
+                                    onChange={(e) => setEditForm({ ...editForm, empCode: e.target.value })}
+                                    placeholder="e.g. 65"
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label>Department</label>
+                                <input
+                                    type="text"
+                                    value={editForm.department}
+                                    onChange={(e) => setEditForm({ ...editForm, department: e.target.value })}
+                                    placeholder="e.g. 2507/a"
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label>Designation</label>
+                                <select
+                                    value={editForm.designation}
+                                    onChange={(e) => setEditForm({ ...editForm, designation: e.target.value })}
+                                >
+                                    <option value="">-- Select --</option>
+                                    <option value="supervisor">Supervisor</option>
+                                    <option value="operator">Operator</option>
+                                    <option value="helper">Helper</option>
+                                </select>
                             </div>
                         </div>
                         <div className="admin-modal-footer">

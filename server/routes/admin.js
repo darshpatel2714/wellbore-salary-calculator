@@ -109,6 +109,10 @@ router.get('/users', async (req, res) => {
                 email: user.email,
                 username: user.username,
                 dailySalaryRate: user.dailySalaryRate,
+                pfNumber: user.pfNumber,
+                empCode: user.empCode,
+                department: user.department,
+                designation: user.designation,
                 createdAt: user.createdAt,
                 entryCount,
                 totalSalary: totalSalary[0]?.total || 0
@@ -143,12 +147,16 @@ router.get('/users', async (req, res) => {
 // Update user
 router.put('/users/:id', async (req, res) => {
     try {
-        const { username, dailySalaryRate } = req.body;
+        const { username, dailySalaryRate, pfNumber, empCode, department, designation } = req.body;
         const userId = req.params.id;
 
         const updateData = {};
         if (username) updateData.username = username.toLowerCase();
         if (dailySalaryRate) updateData.dailySalaryRate = dailySalaryRate;
+        if (pfNumber !== undefined) updateData.pfNumber = pfNumber;
+        if (empCode !== undefined) updateData.empCode = empCode;
+        if (department !== undefined) updateData.department = department;
+        if (designation !== undefined) updateData.designation = designation;
 
         const user = await User.findByIdAndUpdate(userId, updateData, { new: true })
             .select('-password -resetPasswordToken -resetPasswordExpires');
@@ -163,7 +171,11 @@ router.put('/users/:id', async (req, res) => {
                 id: user._id,
                 email: user.email,
                 username: user.username,
-                dailySalaryRate: user.dailySalaryRate
+                dailySalaryRate: user.dailySalaryRate,
+                pfNumber: user.pfNumber,
+                empCode: user.empCode,
+                department: user.department,
+                designation: user.designation
             }
         });
     } catch (error) {

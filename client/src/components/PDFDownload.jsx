@@ -3,7 +3,16 @@ import autoTable from 'jspdf-autotable';
 import { formatDateDisplay } from '../utils/salaryCalculations';
 import { Icons } from './Icons';
 
-function PDFDownload({ entries, month, year, monthlyTotal }) {
+function PDFDownload({ entries, month, year, monthlyTotal, user }) {
+
+    const getDesignationLabel = (value) => {
+        const labels = {
+            'supervisor': 'Supervisor',
+            'operator': 'Operator',
+            'helper': 'Helper'
+        };
+        return labels[value] || value || '-';
+    };
 
     const generatePDF = async () => {
         const doc = new jsPDF('p', 'mm', 'a4');
@@ -19,10 +28,33 @@ function PDFDownload({ entries, month, year, monthlyTotal }) {
         doc.setTextColor(0, 0, 0);
         doc.text(`Salary Slip - ${month} ${year}`, 105, 28, { align: 'center' });
 
-
         // Horizontal line
         doc.setLineWidth(0.5);
         doc.line(15, 33, 195, 33);
+
+        // Employee Details Section
+        doc.setFontSize(11);
+        doc.setFont(undefined, 'bold');
+        doc.setTextColor(26, 26, 46);
+        doc.text('Employee Details:', 15, 42);
+
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'normal');
+        doc.setTextColor(0, 0, 0);
+
+        // Left column
+        doc.text(`Name: ${user?.username || '-'}`, 15, 50);
+        doc.text(`PF Number: ${user?.pfNumber || '-'}`, 15, 57);
+        doc.text(`Department: ${user?.department || '-'}`, 15, 64);
+
+        // Right column
+        doc.text(`Emp Code: ${user?.empCode || '-'}`, 110, 50);
+        doc.text(`Designation: ${getDesignationLabel(user?.designation)}`, 110, 57);
+        doc.text(`Daily Salary: Rs.${user?.dailySalaryRate || '-'}`, 110, 64);
+
+        // Horizontal line after employee details
+        doc.setLineWidth(0.3);
+        doc.line(15, 70, 195, 70);
 
         // Table data
         const tableData = entries.map(entry => [
@@ -39,7 +71,7 @@ function PDFDownload({ entries, month, year, monthlyTotal }) {
 
         // Generate table
         autoTable(doc, {
-            startY: 38,
+            startY: 75,
             head: [[
                 'Date', 'In Time', 'Out Time', 'Present Hrs', 'OT Hrs',
                 'Present Amt', 'OT Amt', 'PF', 'Daily Salary'
@@ -82,7 +114,7 @@ function PDFDownload({ entries, month, year, monthlyTotal }) {
         doc.text(`Generated on: ${new Date().toLocaleDateString('en-IN')}`, 105, finalY + 10, { align: 'center' });
 
         // Save PDF
-        doc.save(`Salary_Slip_${month}_${year}.pdf`);
+        doc.save(`Salary_Slip_${user?.username || 'Employee'}_${month}_${year}.pdf`);
     };
 
     return (

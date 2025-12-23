@@ -288,7 +288,7 @@ function App() {
         {activeTab === 'entry' ? (
           <DailyEntry userId={user.id} dailySalaryRate={user.dailySalaryRate} />
         ) : (
-          <MonthlyView userId={user.id} />
+          <MonthlyView userId={user.id} user={user} />
         )}
       </main>
 

@@ -5,7 +5,7 @@ import PDFDownload from './PDFDownload';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
-function MonthlyView({ userId }) {
+function MonthlyView({ userId, user }) {
     const [year, setYear] = useState(new Date().getFullYear());
     const [month, setMonth] = useState(new Date().getMonth() + 1);
     const [entries, setEntries] = useState([]);
@@ -192,6 +192,7 @@ function MonthlyView({ userId }) {
                         month={months[month - 1]}
                         year={year}
                         monthlyTotal={monthlyTotal}
+                        user={user}
                     />
                 </>
             )}

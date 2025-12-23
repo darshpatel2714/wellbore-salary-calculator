@@ -183,11 +183,6 @@ function DailyEntry({ userId, dailySalaryRate }) {
 
     return (
         <div className="daily-entry">
-            <h2><Icons.Calendar /> आज की एंट्री / Daily Entry</h2>
-
-            <div className="salary-badge">
-                <Icons.IndianRupee /> आपकी सैलरी: ₹{dailySalaryRate?.toLocaleString('en-IN')}/day
-            </div>
 
             <div className="form-group">
                 <label>तारीख / Date</label>

@@ -800,18 +800,41 @@ body::after {
 }
 
 .time-picker-modal {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  margin-top: 0.5rem;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 320px;
+  max-width: 90vw;
   background: white;
   border-radius: 16px;
-  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   border: 1px solid var(--border);
-  z-index: 1000;
+  z-index: 9999;
   overflow: hidden;
-  animation: slideDown 0.25s ease;
+  animation: fadeIn 0.2s ease;
+}
+
+/* Overlay background */
+.time-picker-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 9998;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes slideDown {
@@ -2651,5 +2674,166 @@ body::after {
 
   .admin-table {
     min-width: 800px;
+  }
+}
+
+/* ==================== */
+/* EMPLOYEE SETTINGS    */
+/* ==================== */
+
+.settings-card {
+  background: var(--bg-card);
+  border-radius: 20px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+
+.settings-card h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.settings-card h3 svg {
+  width: 20px;
+  height: 20px;
+  color: var(--primary);
+}
+
+.employee-card {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.03) 0%, rgba(139, 92, 246, 0.03) 100%);
+  border: 1px solid rgba(99, 102, 241, 0.15);
+}
+
+.info-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.info-row:last-child {
+  border-bottom: none;
+}
+
+.info-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  min-width: 120px;
+}
+
+.info-value-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.info-value {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.edit-icon-btn {
+  background: none;
+  border: none;
+  color: var(--primary);
+  cursor: pointer;
+  padding: 0.35rem;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.edit-icon-btn:hover {
+  background: var(--primary-glow);
+}
+
+.edit-icon-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.edit-inline {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.edit-input,
+.edit-select {
+  padding: 0.5rem 0.75rem;
+  border: 2px solid var(--primary);
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  background: var(--bg-card);
+  outline: none;
+  min-width: 150px;
+}
+
+.edit-select {
+  cursor: pointer;
+}
+
+.save-icon-btn,
+.cancel-icon-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.35rem;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.save-icon-btn {
+  color: #10b981;
+}
+
+.save-icon-btn:hover {
+  background: rgba(16, 185, 129, 0.1);
+}
+
+.cancel-icon-btn {
+  color: #ef4444;
+}
+
+.cancel-icon-btn:hover {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.save-icon-btn svg,
+.cancel-icon-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+@media (max-width: 480px) {
+  .info-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .info-value-row {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .edit-inline {
+    width: 100%;
+  }
+
+  .edit-input,
+  .edit-select {
+    flex: 1;
   }
 }

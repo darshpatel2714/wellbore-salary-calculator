@@ -97,59 +97,62 @@ function CustomTimePicker({ value, onChange, className }) {
 
             {/* Picker Modal */}
             {showPicker && (
-                <div className="time-picker-modal">
-                    <div className="picker-columns">
-                        {/* Hour Column */}
-                        <div className="picker-column" ref={hourRef}>
-                            {hours.map((h, i) => (
+                <>
+                    <div className="time-picker-overlay" onClick={() => setShowPicker(false)}></div>
+                    <div className="time-picker-modal">
+                        <div className="picker-columns">
+                            {/* Hour Column */}
+                            <div className="picker-column" ref={hourRef}>
+                                {hours.map((h, i) => (
+                                    <div
+                                        key={h}
+                                        className={`picker-item ${selectedHour === i + 1 ? 'selected' : ''}`}
+                                        onClick={() => setSelectedHour(i + 1)}
+                                    >
+                                        {h}
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* Minute Column */}
+                            <div className="picker-column" ref={minuteRef}>
+                                {minutes.map((m, i) => (
+                                    <div
+                                        key={m}
+                                        className={`picker-item ${selectedMinute === i ? 'selected' : ''}`}
+                                        onClick={() => setSelectedMinute(i)}
+                                    >
+                                        {m}
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* AM/PM Column */}
+                            <div className="picker-column period-column">
                                 <div
-                                    key={h}
-                                    className={`picker-item ${selectedHour === i + 1 ? 'selected' : ''}`}
-                                    onClick={() => setSelectedHour(i + 1)}
+                                    className={`picker-item ${period === 'AM' ? 'selected' : ''}`}
+                                    onClick={() => setPeriod('AM')}
                                 >
-                                    {h}
+                                    AM
                                 </div>
-                            ))}
+                                <div
+                                    className={`picker-item ${period === 'PM' ? 'selected' : ''}`}
+                                    onClick={() => setPeriod('PM')}
+                                >
+                                    PM
+                                </div>
+                            </div>
                         </div>
 
-                        {/* Minute Column */}
-                        <div className="picker-column" ref={minuteRef}>
-                            {minutes.map((m, i) => (
-                                <div
-                                    key={m}
-                                    className={`picker-item ${selectedMinute === i ? 'selected' : ''}`}
-                                    onClick={() => setSelectedMinute(i)}
-                                >
-                                    {m}
-                                </div>
-                            ))}
-                        </div>
+                        {/* Selection Highlight */}
+                        <div className="selection-highlight"></div>
 
-                        {/* AM/PM Column */}
-                        <div className="picker-column period-column">
-                            <div
-                                className={`picker-item ${period === 'AM' ? 'selected' : ''}`}
-                                onClick={() => setPeriod('AM')}
-                            >
-                                AM
-                            </div>
-                            <div
-                                className={`picker-item ${period === 'PM' ? 'selected' : ''}`}
-                                onClick={() => setPeriod('PM')}
-                            >
-                                PM
-                            </div>
-                        </div>
+                        {/* Confirm Button */}
+                        <button type="button" className="confirm-btn" onClick={handleConfirm}>
+                            ✓ Set Time
+                        </button>
                     </div>
-
-                    {/* Selection Highlight */}
-                    <div className="selection-highlight"></div>
-
-                    {/* Confirm Button */}
-                    <button type="button" className="confirm-btn" onClick={handleConfirm}>
-                        ✓ Set Time
-                    </button>
-                </div>
+                </>
             )}
         </div>
     );
