@@ -599,7 +599,9 @@ body::after {
 .date-input,
 .time-input,
 .login-input,
-.salary-input {
+.salary-input,
+.text-input,
+.select-input {
   width: 100%;
   padding: 1rem 1.25rem;
   border: 2px solid var(--border);
@@ -610,6 +612,53 @@ body::after {
   font-weight: 500;
   transition: all 0.3s ease;
   outline: none;
+}
+
+/* Employee Details Section */
+.employee-details-section {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%);
+  border: 1px solid rgba(99, 102, 241, 0.15);
+  border-radius: 16px;
+  padding: 1.25rem;
+  margin: 1.5rem 0;
+}
+
+.employee-details-section h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.employee-details-section h3 svg {
+  width: 20px;
+  height: 20px;
+}
+
+.employee-details-section .form-group {
+  margin-bottom: 1rem;
+}
+
+.employee-details-section .form-group:last-child {
+  margin-bottom: 0;
+}
+
+.select-input {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%236366f1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 20px;
+  padding-right: 3rem;
+}
+
+.select-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px var(--primary-glow), var(--shadow-md);
 }
 
 .date-input::placeholder,

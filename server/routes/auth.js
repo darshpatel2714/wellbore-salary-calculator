@@ -105,7 +105,11 @@ router.post('/signup', async (req, res) => {
                 id: user._id,
                 email: user.email,
                 username: user.username,
-                dailySalaryRate: user.dailySalaryRate
+                dailySalaryRate: user.dailySalaryRate,
+                pfNumber: user.pfNumber,
+                empCode: user.empCode,
+                department: user.department,
+                designation: user.designation
             }
         });
     } catch (error) {
@@ -155,7 +159,11 @@ router.post('/login', async (req, res) => {
                 id: user._id,
                 email: user.email,
                 username: user.username,
-                dailySalaryRate: user.dailySalaryRate
+                dailySalaryRate: user.dailySalaryRate,
+                pfNumber: user.pfNumber,
+                empCode: user.empCode,
+                department: user.department,
+                designation: user.designation
             }
         });
     } catch (error) {
@@ -272,10 +280,10 @@ router.post('/reset-password', async (req, res) => {
     }
 });
 
-// PUT - Update salary rate
+// PUT - Update salary rate and employee details
 router.put('/salary', async (req, res) => {
     try {
-        const { userId, dailySalaryRate } = req.body;
+        const { userId, dailySalaryRate, pfNumber, empCode, department, designation } = req.body;
 
         if (!dailySalaryRate || dailySalaryRate <= 0) {
             return res.status(400).json({
@@ -283,9 +291,17 @@ router.put('/salary', async (req, res) => {
             });
         }
 
+        const updateData = { dailySalaryRate };
+
+        // Add optional employee details
+        if (pfNumber) updateData.pfNumber = pfNumber;
+        if (empCode) updateData.empCode = empCode;
+        if (department) updateData.department = department;
+        if (designation) updateData.designation = designation;
+
         const user = await User.findByIdAndUpdate(
             userId,
-            { dailySalaryRate },
+            updateData,
             { new: true }
         );
 
@@ -296,12 +312,16 @@ router.put('/salary', async (req, res) => {
         }
 
         res.json({
-            message: 'Salary updated / सैलरी अपडेट हो गई',
+            message: 'Details updated / जानकारी अपडेट हो गई',
             user: {
                 id: user._id,
                 email: user.email,
                 username: user.username,
-                dailySalaryRate: user.dailySalaryRate
+                dailySalaryRate: user.dailySalaryRate,
+                pfNumber: user.pfNumber,
+                empCode: user.empCode,
+                department: user.department,
+                designation: user.designation
             }
         });
     } catch (error) {

@@ -34,6 +34,26 @@ const userSchema = new mongoose.Schema({
     isAdmin: {
         type: Boolean,
         default: false
+    },
+    pfNumber: {
+        type: String,
+        default: null,
+        trim: true
+    },
+    empCode: {
+        type: String,
+        default: null,
+        trim: true
+    },
+    department: {
+        type: String,
+        default: null,
+        trim: true
+    },
+    designation: {
+        type: String,
+        enum: ['supervisor', 'operator', 'helper', null],
+        default: null
     }
 }, {
     timestamps: true
